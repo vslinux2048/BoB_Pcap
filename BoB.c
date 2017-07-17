@@ -83,7 +83,10 @@ while(True)
 		{
 			printf("%02X", ehP->ether_shost[x]);
 		}
-	
+		puts("");
+
+		printf("[*]Source Port : %d \n", *(packet+34) + *(packet+35) );
+		printf("[*]Destionation Port : %d \n", *(packet+36) + *(packet+37) );
 	}
 
 	
