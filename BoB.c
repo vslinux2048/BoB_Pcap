@@ -1,6 +1,8 @@
 #include <pcap.h>
 #include <stdio.h>
 #include <net/ethernet.h>
+#include <arpa/inet.h>
+#include <netinet/ip.h>
 
 #define True 1
 
@@ -9,6 +11,12 @@
 // 	struct iphdr *iph = (struct iphdr *)vpn;
 // 	printf("MAC: %s\n", inet_ntoa(iph->saddr));
 // }
+
+void * Ipheader(void * v) 
+{
+	struct iphdr * iph = (struct iphdr *)v;
+	printf("IP Version: %d \n", iph->version);
+}
 
 int main(int argc, char *argv[])
 {
@@ -23,7 +31,8 @@ struct pcap_pkthdr * header;	/* The header that pcap gives us */
 const u_char *packet;		/* The actual packet */
 int pat;
 struct ether_header * p_a;
-struct iphdr * iph;
+int x;
+
 
 
 		/* Define the device */
@@ -60,15 +69,26 @@ while(True)
 
 	if(pat = pcap_next_ex(handle, &header, &packet))
 	{
-		p_a = (struct ether_header *)packet;
-		printf("S_Mac:  %c", p_a->ether_shost);
-		// for(int i = 0; i < 6; i++)
-		// 	printf("%02X", *((p_a->ether_shost)+i));
+
+		struct iphdr * iph = (void*)(packet+sizeof(struct ether_header));
+		struct ether_header * ehP = (struct ether_header *)(void*)packet;
+
+		printf("\n\n----------DongDongE!! Packet ----------\n");
+		printf("[*]IP Version: %d [*]\n", iph->version);
+		printf("[*]Source IP : %s [*]\n", inet_ntoa(*(struct in_addr *)&iph->saddr));
+		printf("[*]Destionation IP : %s [*]\n", inet_ntoa(*(struct in_addr *)&iph->daddr));
+
+		printf("[*]Source MAC :");
+		for (x=0; x<6; x++)
+		{
+			printf("%02X", ehP->ether_shost[x]);
+		}
+	
 	}
+
+	
 }
 
 pcap_close(handle);
 return(0);
 }
-
-
