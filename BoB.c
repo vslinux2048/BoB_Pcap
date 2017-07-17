@@ -1,18 +1,29 @@
 #include <pcap.h>
 #include <stdio.h>
+#include <net/ethernet.h>
+
 #define True 1
+
+// void test(void * vpn)
+// {
+// 	struct iphdr *iph = (struct iphdr *)vpn;
+// 	printf("MAC: %s\n", inet_ntoa(iph->saddr));
+// }
 
 int main(int argc, char *argv[])
 {
-		pcap_t *handle;			/* Session handle */
-		char *dev;			/* 사용자 디바이스 */
-		char errbuf[PCAP_ERRBUF_SIZE];	/* Error string */
-		struct bpf_program fp;		/* The compiled filter */
-		char filter_exp[] = "port 80";	/* The filter expression */
-		bpf_u_int32 mask;		/* Our netmask */
-		bpf_u_int32 net;		/* Our IP */
-		struct pcap_pkthdr header;	/* The header that pcap gives us */
-		const u_char *packet;		/* The actual packet */
+pcap_t *handle;			/* Session handle */
+char *dev;			/* 사용자 디바이스 */
+char errbuf[PCAP_ERRBUF_SIZE];	/* Error string */
+struct bpf_program fp;		/* The compiled filter */
+char filter_exp[] = "port 80";	/* The filter expression */
+bpf_u_int32 mask;		/* Our netmask */
+bpf_u_int32 net;		/* Our IP */
+struct pcap_pkthdr * header;	/* The header that pcap gives us */
+const u_char *packet;		/* The actual packet */
+int pat;
+struct ether_header * p_a;
+struct iphdr * iph;
 
 
 		/* Define the device */
@@ -36,30 +47,28 @@ int main(int argc, char *argv[])
 	}
 		/* Compile and apply the filter */
 	if (pcap_compile(handle, &fp, filter_exp, 0, net) == -1) {	 /* 들어 오는 패킷을 필터링 */
-		fprintf(stderr, "Couldn't parse filter %s: %s\n", filter_exp, pcap_geterr(handle));
-		return(2);
-	}
-	if (pcap_setfilter(handle, &fp) == -1) {
-		fprintf(stderr, "Couldn't install filter %s: %s\n", filter_exp, pcap_geterr(handle));
-		return(2);
-	}
+	fprintf(stderr, "Couldn't parse filter %s: %s\n", filter_exp, pcap_geterr(handle));
+	return(2);
+}
+if (pcap_setfilter(handle, &fp) == -1) {
+	fprintf(stderr, "Couldn't install filter %s: %s\n", filter_exp, pcap_geterr(handle));
+	return(2);
+}
 
-	while(True)
+while(True)
+{
+
+	if(pat = pcap_next_ex(handle, &header, &packet))
 	{
-
-	/* Grab a packet */
-		packet = pcap_next(handle, &header);
-
-		/* Print its length */
-		printf("Jacked a packet with length of [%d]\n", header.len);
-		// printf("%d dwadd\n", mask);
-
-
-		/* And close the session */
+		p_a = (struct ether_header *)packet;
+		printf("S_Mac:  %c", p_a->ether_shost);
+		// for(int i = 0; i < 6; i++)
+		// 	printf("%02X", *((p_a->ether_shost)+i));
 	}
+}
 
-	pcap_close(handle);
-	return(0);
+pcap_close(handle);
+return(0);
 }
 
 
