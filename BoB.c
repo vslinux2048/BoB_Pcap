@@ -4,34 +4,42 @@
 #include <arpa/inet.h>
 #include <netinet/ip.h>
 
-#define True 1
+#define True 1			/* while */
 
-// void test(void * vpn)
-// {
-// 	struct iphdr *iph = (struct iphdr *)vpn;
-// 	printf("MAC: %s\n", inet_ntoa(iph->saddr));
-// }
-
-void * Ipheader(void * v) 
-{
-	struct iphdr * iph = (struct iphdr *)v;
-	printf("IP Version: %d \n", iph->version);
-}
+void ASCII_DATA(const u_char * ucData, int len)  
+{  
+    int iCntx, iCnty, iCntz;  
+    int addr = 0;  
+    u_char * p = (u_char*)ucData;  
+      
+    printf("[*] ASCII DATA : ");  
+      
+    for(iCntx = 0, iCntz = 0; iCntx < len/64+1; ++iCntx)  
+    {  
+        for(iCnty = 0; iCnty < 64; ++iCnty)  
+        {  
+            if((0x21 <= *p) && (0x7E >= *p) && (iCntz < len))  
+                printf("%c", *p);  
+            else  
+                printf(".");  
+            ++p;  
+        }  
+        addr += 16;  
+    }  
+}  
 
 int main(int argc, char *argv[])
 {
-pcap_t *handle;			/* Session handle */
-char *dev;			/* 사용자 디바이스 */
-char errbuf[PCAP_ERRBUF_SIZE];	/* Error string */
-struct bpf_program fp;		/* The compiled filter */
-char filter_exp[] = "port 80";	/* The filter expression */
-bpf_u_int32 mask;		/* Our netmask */
-bpf_u_int32 net;		/* Our IP */
-struct pcap_pkthdr * header;	/* The header that pcap gives us */
-const u_char *packet;		/* The actual packet */
-int pat;
-struct ether_header * p_a;
-int x;
+	pcap_t *handle;			/* Session handle */
+	char *dev;			/* 사용자 디바이스 */
+	char errbuf[PCAP_ERRBUF_SIZE];	/* Error string */
+	struct bpf_program fp;		/* The compiled filter */
+	char filter_exp[] = "port 80";	/* The filter expression */
+	bpf_u_int32 mask;		/* Our netmask */
+	bpf_u_int32 net;		/* Our IP */
+	struct pcap_pkthdr * header;	/* The header that pcap gives us */
+	const u_char *packet;		/* The actual packet */
+	int x;
 
 
 
@@ -59,35 +67,42 @@ int x;
 	fprintf(stderr, "Couldn't parse filter %s: %s\n", filter_exp, pcap_geterr(handle));
 	return(2);
 }
-if (pcap_setfilter(handle, &fp) == -1) {
+if (pcap_setfilter(handle, &fp) == -1) { /* pcap_compile() 통하여 지정된 필터를 적용 */
 	fprintf(stderr, "Couldn't install filter %s: %s\n", filter_exp, pcap_geterr(handle));
 	return(2);
 }
 
 while(True)
 {
-
-	if(pat = pcap_next_ex(handle, &header, &packet))
+	/* 캡처한 패킷 데이터를 가져온다. */
+	if(pcap_next_ex(handle, &header, &packet))
 	{
 
+		/* iphdr Struct      IP Header가 정의 되어있다.*/
 		struct iphdr * iph = (void*)(packet+sizeof(struct ether_header));
+		/* Ethernet Header // */
 		struct ether_header * ehP = (struct ether_header *)(void*)packet;
 
-		printf("\n\n----------DongDongE!! Packet ----------\n");
-		printf("[*]IP Version: %d [*]\n", iph->version);
-		printf("[*]Source IP : %s [*]\n", inet_ntoa(*(struct in_addr *)&iph->saddr));
-		printf("[*]Destionation IP : %s [*]\n", inet_ntoa(*(struct in_addr *)&iph->daddr));
+		printf("\n\n----------\tDongDongE!! Packet \t----------\n");
+		printf("[*] IP Version: %d \t[*]\n", iph->version);  // IPv4
+											/* inet_ntoa type 정의를 안하면 에러가 발생함으로...*/
+		printf("[*] Source IP : %s \t[*]\n", inet_ntoa(*(struct in_addr *)&iph->saddr));
+		printf("[*] Destionation IP : %s [*]\n", inet_ntoa(*(struct in_addr *)&iph->daddr));
 
-		printf("[*]Source MAC :");
-		for (x=0; x<6; x++)
+		printf("[*] Source MAC :");
+		for (x=0; x<6; x++) /* */
 		{
 			printf("%02X", ehP->ether_shost[x]);
 		}
 		puts("");
 
-		printf("[*]Source Port : %d \n", *(packet+34) + *(packet+35) );
-		printf("[*]Destionation Port : %d \n", *(packet+36) + *(packet+37) );
+		// printf("[*] Source Port : %d [*]\n", *(packet+34) + *(packet+35) );
+		printf("[*] Source Port : %d [*]\n", packet[34] + packet[35]);
+		printf("[*] Destionation Port : %d [*]\n", packet[36] + packet[37] );
+
+		ASCII_DATA(packet, header->caplen);
 	}
+
 
 	
 }
