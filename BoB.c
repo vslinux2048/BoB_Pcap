@@ -11,7 +11,7 @@ void ASCII_DATA(const u_char * ucData, int len)
     int iCntx, iCnty, iCntz;  
     int addr = 0;  
     u_char * p = (u_char*)ucData;  
-      
+   
     printf("[*] ASCII DATA : ");  
       
     for(iCntx = 0, iCntz = 0; iCntx < len/64+1; ++iCntx)  
@@ -35,12 +35,9 @@ int main(int argc, char *argv[])
 	char errbuf[PCAP_ERRBUF_SIZE];	/* Error string */
 	struct bpf_program fp;		/* The compiled filter */
 	char filter_exp[] = "port 80";	/* The filter expression */
-	bpf_u_int32 mask;		/* Our netmask */
-	bpf_u_int32 net;		/* Our IP */
 	struct pcap_pkthdr * header;	/* The header that pcap gives us */
 	const u_char *packet;		/* The actual packet */
 	int x;
-
 
 
 		/* Define the device */
@@ -49,28 +46,15 @@ int main(int argc, char *argv[])
 		fprintf(stderr, "네트워크 디바이스가 존재하지 않습니다. Error: %s\n", errbuf);
 		return(2);
 	}
-		/* Find the properties for the device */
-	if (pcap_lookupnet(dev, &net, &mask, errbuf) == -1) 	/* 네트워크 디바이스에 대한 네트워크번호와 MASK 번호를 되돌려준다. */
-	{	
-		fprintf(stderr, "Couldn't get netmask for device %s: %s\n", dev, errbuf);
-		net = 0;
-		mask = 0;
-	}
+
+	dev = argv[1];
+
 		/* Open the session in promiscuous mode */
 	handle = pcap_open_live(dev, BUFSIZ, 1, 1000, errbuf);		/* 패킷을 캡처하는 실질적인 역할 */
 	if (handle == NULL) {
 		fprintf(stderr, "Couldn't open device %s: %s\n", dev, errbuf);
 		return(2);
 	}
-		/* Compile and apply the filter */
-	if (pcap_compile(handle, &fp, filter_exp, 0, net) == -1) {	 /* 들어 오는 패킷을 필터링 */
-	fprintf(stderr, "Couldn't parse filter %s: %s\n", filter_exp, pcap_geterr(handle));
-	return(2);
-}
-if (pcap_setfilter(handle, &fp) == -1) { /* pcap_compile() 통하여 지정된 필터를 적용 */
-	fprintf(stderr, "Couldn't install filter %s: %s\n", filter_exp, pcap_geterr(handle));
-	return(2);
-}
 
 while(True)
 {
