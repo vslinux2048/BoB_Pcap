@@ -44,6 +44,29 @@ typedef struct ip_header
 	u_int op_pad; // Option + Padding
 }ip_header;
 
+void ASCII_DATA(const u_char * ucData, int len)  
+{  
+    int iCntx, iCnty, iCntz;  
+
+    u_char * p = (u_char*)ucData;  
+      
+    printf("[*] ASCII DATA : ");  
+      
+    for(iCntx = 0, iCntz = 0; iCntx < len/64+1; ++iCntx)  
+    {  
+        for(iCnty = 0; iCnty < 64; ++iCnty)  
+        {  
+            if((0x21 <= *p) && (0x7E >= *p) && (iCntz < len))  
+                printf("%c", *p);  
+            else  
+                printf(".");  
+            ++p;  
+        }  
+       
+    }  
+}  
+
+
  int main(int argc, char *argv[])
  {
 	pcap_t *handle;			/* Session handle */
@@ -57,12 +80,6 @@ typedef struct ip_header
 
 
 		/* Define the device */
-	dev = pcap_lookupdev(errbuf);	/* 네트워크 디바이스명 가져오는 함수 */
- 	if (dev == NULL) {
- 		fprintf(stderr, "네트워크 디바이스가 존재하지 않습니다. Error: %s\n", errbuf);
- 		return(2);
- 	}
-
  	dev = argv[1];
 
 		/* Open the session in promiscuous mode */
@@ -93,7 +110,7 @@ typedef struct ip_header
  			puts("");
  			printf("[*] --- Source IP: %d.%d.%d.%d \n", ih->saddr.byte1,
  				ih->saddr.byte2, ih->saddr.byte3, ih->saddr.byte4);
- 			printf("[*] --- Source");
+ 			printf("[*] --- Source PORT: %d \n\n", packet[34] + packet[35]);
 
  			printf("[*] --- Destination MAC: ");
  			for (x = 0; x < 6; x++) {
@@ -107,24 +124,10 @@ typedef struct ip_header
  			puts("");
  			printf("[*] --- Destination IP: %d.%d.%d.%d \n", ih->daddr.byte1,
  				ih->daddr.byte2, ih->daddr.byte3, ih->daddr.byte4);
+ 			printf("[*] --- Destination PORT: %d \n", packet[36] + packet[37]);
 
-		// printf("[*] IP Version: %d \t[*]\n", iph->version);  // IPv4
-		// 									/* inet_ntoa type 정의를 안하면 에러가 발생함으로...*/
-		// printf("[*] Source IP : %s \t[*]\n", inet_ntoa(*(struct in_addr *)&iph->saddr));
-		// printf("[*] Destionation IP : %s [*]\n", inet_ntoa(*(struct in_addr *)&iph->daddr));
-
-		// printf("[*] Source MAC :");
-		// for (x=0; x<6; x++) /* */
-		// {
-		// 	printf("%02X", ehP->ether_shost[x]);
-		// }
-		// puts("");
-
-		// // printf("[*] Source Port : %d [*]\n", *(packet+34) + *(packet+35) );
-		// printf("[*] Source Port : %d [*]\n", packet[34] + packet[35]);
-		// printf("[*] Destionation Port : %d [*]\n", packet[36] + packet[37] );
-
-		// ASCII_DATA(packet, header->caplen);
+		ASCII_DATA(packet, header->caplen);
+		puts("\n\n\n");
  		}
 
 
