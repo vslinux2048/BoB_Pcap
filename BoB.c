@@ -44,45 +44,6 @@ typedef struct ip_header
 	u_int op_pad; // Option + Padding
 }ip_header;
 
-
-
-typedef struct tcp_header {
-	u_short sport; // Source port
- 	u_short dport; // Destination port
- 	u_int seqnum; // Sequence Number
- 	u_int acknum; // Acknowledgement number
- 	u_char th_off; // Header length
- 	u_char flags; // packet flags
- 	u_short win; // Window size
- 	u_short crc; // Header Checksum
- 	u_short urgptr; // Urgent pointer...still don't know what this is...
- }tcp_header;
-
-
-
-
-// void ASCII_DATA(const u_char * ucData, int len)  
-// {  
-//     int iCntx, iCnty, iCntz;  
-//     int addr = 0;  
-//     u_char * p = (u_char*)ucData;  
-
-//     printf("[*] ASCII DATA : ");  
-
-//     for(iCntx = 0, iCntz = 0; iCntx < len/64+1; ++iCntx)  
-//     {  
-//         for(iCnty = 0; iCnty < 64; ++iCnty)  
-//         {  
-//             if((0x21 <= *p) && (0x7E >= *p) && (iCntz < len))  
-//                 printf("%c", *p);  
-//             else  
-//                 printf(".");  
-//             ++p;  
-//         }  
-//         addr += 16;  
-//     }  
-// }  
-
  int main(int argc, char *argv[])
  {
 	pcap_t *handle;			/* Session handle */
@@ -116,17 +77,31 @@ typedef struct tcp_header {
 	/* 캡처한 패킷 데이터를 가져온다. */
  		if(pcap_next_ex(handle, &header, &packet))
  		{
-
-		/* iphdr Struct      IP Header가 정의 되어있다.*/
-		// struct iphdr * iph = (void*)(packet+sizeof(struct ether_header));
-		/* Ethernet Header // */
-		// struct ether_header * ehP = (struct ether_header *)(void*)packet;
-
  			struct ether_header * eth = (struct ether_header *)(void*)packet;
  			struct ip_header * ih = (ip_header *)(packet + 14);
- 			printf("S_IP : %d %d %d %d \n\n\n", ih->saddr.byte1, ih->saddr.byte2, ih->saddr.byte3, ih->saddr.byte4);
+ 			// printf("S_IP : %d %d %d %d \n\n\n", ih->saddr[0], ih->saddr.byte2, ih->saddr.byte3, ih->saddr.byte4);
  			printf("\n\n----------\tDongDongE!! Packet \t----------\n");
- 			printf("ip versioin is %d\n",ih->ip_version);
+ 			printf("[*] --- Source MAC: ");
+ 			for (x = 0; x < 6; x++) {
+
+ 				printf("%02X", eth->ether_shost[x]);
+ 				if(x == 5)
+ 					break;
+ 				else
+ 					printf(":");
+ 			}
+ 			puts("");
+ 			printf("[*] --- Destination MAC: ");
+ 			for (x = 0; x < 6; x++) {
+
+ 				printf("%02X", eth->ether_dhost[x]);
+ 				if(x == 5)
+ 					break;
+ 				else
+ 					printf(":");
+ 			}
+ 			printf("Source IP: %d.%d.%d.%d\n",packet[26],packet[27],packet[28],packet[29]);
+ 			puts("");
 
 		// printf("[*] IP Version: %d \t[*]\n", iph->version);  // IPv4
 		// 									/* inet_ntoa type 정의를 안하면 에러가 발생함으로...*/
