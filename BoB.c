@@ -91,6 +91,10 @@ typedef struct ip_header
  					printf(":");
  			}
  			puts("");
+ 			printf("[*] --- Source IP: %d.%d.%d.%d \n", ih->saddr.byte1,
+ 				ih->saddr.byte2, ih->saddr.byte3, ih->saddr.byte4);
+ 			printf("[*] --- Source");
+
  			printf("[*] --- Destination MAC: ");
  			for (x = 0; x < 6; x++) {
 
@@ -100,8 +104,9 @@ typedef struct ip_header
  				else
  					printf(":");
  			}
- 			printf("Source IP: %d.%d.%d.%d\n",packet[26],packet[27],packet[28],packet[29]);
  			puts("");
+ 			printf("[*] --- Destination IP: %d.%d.%d.%d \n", ih->daddr.byte1,
+ 				ih->daddr.byte2, ih->daddr.byte3, ih->daddr.byte4);
 
 		// printf("[*] IP Version: %d \t[*]\n", iph->version);  // IPv4
 		// 									/* inet_ntoa type 정의를 안하면 에러가 발생함으로...*/
